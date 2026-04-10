@@ -1,0 +1,90 @@
+{
+  "project": "StartupSignal",
+  "vision": "Bloomberg Terminal meets startup graveyard — dark, data-dense, premium intelligence dashboard",
+  "stories": [
+    {
+      "id": 1,
+      "title": "App Shell & Layout",
+      "description": "Sidebar navigation + main content area + dark theme foundation. Sidebar: logo, nav items (Dashboard, Ideas DB, Failure Library, Settings). Responsive collapse to hamburger on mobile.",
+      "complexity": "low",
+      "model": "sonnet"
+    },
+    {
+      "id": 2,
+      "title": "Hero Leaderboard — Top 3 Ideas",
+      "description": "Three large cards showing this week's top-scored startup ideas. Each card: rank badge, idea title, one-line description, LaunchabilityScore (0-100) with radial progress, 6-axis mini radar chart (Market Timing, Market Size, Competition, Tech Readiness, Execution Complexity, Failure Risk), trending arrow. Cards expand on click.",
+      "complexity": "high",
+      "model": "sonnet"
+    },
+    {
+      "id": 3,
+      "title": "Expanded Idea Detail Panel",
+      "description": "When a top-3 card is clicked, expands to show: full score breakdown by dimension (6 horizontal bars), business plan summary (2-3 paragraphs), build requirements (tech stack, team, estimated cost), market heating chart (score over last 12 weeks as area chart), and Failure Graveyard panel.",
+      "complexity": "high",
+      "model": "sonnet"
+    },
+    {
+      "id": 4,
+      "title": "Failure Graveyard Panel",
+      "description": "Inside each idea detail: shows 3-5 most similar failed startups. Each entry: startup name, year, funding raised, time-to-failure, primary failure mode badge (PMF/Timing/Team/Market/Competition/Unit Economics/Regulatory), one-line cause. Animated entry with stagger.",
+      "complexity": "medium",
+      "model": "sonnet"
+    },
+    {
+      "id": 5,
+      "title": "Idea Database Tab",
+      "description": "Searchable/filterable table of all startup ideas. Columns: rank, idea name, category, score, trend, source (YC/Techstars/500/Antler). Filters: category dropdown, score range slider, source multi-select. Sort by any column. Paginated (20 per page).",
+      "complexity": "medium",
+      "model": "sonnet"
+    },
+    {
+      "id": 6,
+      "title": "Failure Pattern Library Tab",
+      "description": "Visual breakdown of failure patterns. Top: 7 failure category cards with count + percentage (PMF 34%, Timing 22%, etc). Below: list of failures filterable by category. Each entry: name, year, category badge, funding, one-line summary. Click expands to full post-mortem.",
+      "complexity": "medium",
+      "model": "sonnet"
+    },
+    {
+      "id": 7,
+      "title": "Radar Chart Component",
+      "description": "Reusable 6-axis radar/spider chart for the LaunchabilityScore breakdown. Axes: Market Timing, Market Size, Competition, Tech Readiness, Execution Complexity, Failure Risk. Animated fill on mount. Uses Recharts RadarChart with dynamic import + ssr:false.",
+      "complexity": "high",
+      "model": "sonnet"
+    },
+    {
+      "id": 8,
+      "title": "Market Heating Area Chart",
+      "description": "Area chart showing score trend over 12 weeks. Gradient fill, tooltip on hover, reference line for current week. Uses Recharts AreaChart with dynamic import + ssr:false. Explicit parent height h-[250px].",
+      "complexity": "high",
+      "model": "sonnet"
+    },
+    {
+      "id": 9,
+      "title": "Stats Strip & KPIs",
+      "description": "Horizontal strip below hero showing: Total Ideas Tracked (number), Active Failures Analyzed (number), Average Score This Week (number + trend), Top Category (name). Animated count-up on mount.",
+      "complexity": "low",
+      "model": "sonnet"
+    },
+    {
+      "id": 10,
+      "title": "Mock Data Layer",
+      "description": "Comprehensive mock data file with: 20 startup ideas with full scores and descriptions, 30 failed startups with post-mortems and failure categories, 12 weeks of historical scores, category distributions. Realistic data based on actual YC/startup ecosystem.",
+      "complexity": "low",
+      "model": "groq"
+    },
+    {
+      "id": 11,
+      "title": "Animations & Polish",
+      "description": "Framer Motion throughout: page transitions, card hover states (subtle lift + glow), stagger animations on lists, smooth expand/collapse on detail panels. Loading skeletons for all data sections. Glass morphism on cards.",
+      "complexity": "medium",
+      "model": "sonnet"
+    },
+    {
+      "id": 12,
+      "title": "Responsive + Final QA",
+      "description": "Mobile responsive at 320px, 768px, 1024px, 1440px. Sidebar collapses. Cards stack vertically on mobile. Tables become scrollable. Lighthouse >90. No console errors. Bundle check with Knip.",
+      "complexity": "medium",
+      "model": "sonnet"
+    }
+  ]
+}
