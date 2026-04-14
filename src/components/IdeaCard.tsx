@@ -3,6 +3,7 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import MarketHeatingChartDynamic from "@/components/charts/MarketHeatingChartDynamic";
+import ExecutionBrief from "@/components/ExecutionBrief";
 import FailureGraveyard from "@/components/FailureGraveyard";
 import type { StartupIdea } from "@/lib/data";
 
@@ -275,6 +276,19 @@ export function IdeaCard({ idea, rank, isExpanded, onToggle }: IdeaCardProps) {
                   <FailureGraveyard failures={idea.failureGraveyard} />
                 </div>
               )}
+
+              {/* ── Execution Brief (Qwen AI) ── */}
+              <div>
+                <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">
+                  Execution Brief
+                </h4>
+                <ExecutionBrief
+                  ideaId={idea.id}
+                  title={idea.title}
+                  description={idea.description}
+                  category={idea.category}
+                />
+              </div>
             </div>
           </motion.div>
         )}

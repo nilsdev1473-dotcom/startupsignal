@@ -22,7 +22,7 @@ export async function GET() {
     category: row.category,
     source: row.source,
     launchabilityScore: (row.launchability_score as number) || 50,
-    scores: (row.scores as object) || {
+    scores: (row.score_dimensions as object) || {
       marketTiming: 50,
       marketSize: 50,
       competition: 50,
