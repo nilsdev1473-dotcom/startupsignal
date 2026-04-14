@@ -5,7 +5,7 @@ import { createServerSupabase } from "@/lib/supabase";
 export async function GET() {
   const sb = createServerSupabase();
   const { data, error } = await sb
-    .from("startup_ideas")
+    .from("yc_ideas")
     .select("*")
     .order("launchability_score", { ascending: false, nullsFirst: false })
     .limit(100);
