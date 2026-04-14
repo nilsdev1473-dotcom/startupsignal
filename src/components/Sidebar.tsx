@@ -21,7 +21,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="fixed left-0 top-0 h-screen w-60 flex flex-col"
+      className="hidden lg:flex fixed left-0 top-0 h-screen w-60 flex-col"
       style={{
         backgroundColor: "#111113",
         borderRight: "1px solid rgba(255,255,255,0.08)",

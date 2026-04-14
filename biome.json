@@ -7,8 +7,17 @@
     "enabled": true,
     "rules": {
       "recommended": true,
-      "suspicious": { "noArrayIndexKey": "warn" }
+      "suspicious": {
+        "noArrayIndexKey": "warn"
+      },
+      "style": {
+        "noNonNullAssertion": "warn"
+      }
     }
   },
-  "formatter": { "enabled": true, "indentStyle": "space", "indentWidth": 2 }
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2
+  }
 }

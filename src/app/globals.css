@@ -50,3 +50,15 @@ body {
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.12) #0a0a0b;
 }
+
+/* Safe area for iPhone notch/home bar */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Mobile bottom nav clearance */
+@media (max-width: 1023px) {
+  main {
+    padding-bottom: 80px;
+  }
+}

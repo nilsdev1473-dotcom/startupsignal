@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import BottomNav from "@/components/BottomNav";
 import Sidebar from "@/components/Sidebar";
 
 const geistSans = Geist({
@@ -35,11 +36,12 @@ export default function RootLayout({
       >
         <Sidebar />
         <main
-          className="ml-60 min-h-screen"
+          className="lg:ml-60 min-h-screen pb-16 lg:pb-0"
           style={{ backgroundColor: "#0A0A0B" }}
         >
           {children}
         </main>
+        <BottomNav />
       </body>
     </html>
   );
