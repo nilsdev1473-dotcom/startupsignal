@@ -49,6 +49,7 @@ export interface StartupIdea {
   trend: Trend;
   weeklyScores: number[];
   failureGraveyard: GraveyardEntry[];
+  executionBrief?: string | null;
 }
 
 export interface FailedStartup {

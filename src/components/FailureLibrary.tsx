@@ -210,13 +210,13 @@ function FailureCard({ failure }: { failure: FailedStartup }) {
 }
 
 // Failure mode distribution bar
-function FailureStats() {
-  const modeCounts = FAILURES.reduce<Record<string, number>>((acc, f) => {
+function FailureStats({ failures }: { failures: FailedStartup[] }) {
+  const modeCounts = failures.reduce<Record<string, number>>((acc, f) => {
     acc[f.failureMode] = (acc[f.failureMode] ?? 0) + 1;
     return acc;
   }, {});
 
-  const total = FAILURES.length;
+  const total = failures.length;
 
   return (
     <div
@@ -279,14 +279,19 @@ function FailureStats() {
   );
 }
 
-export default function FailureLibrary() {
+export default function FailureLibrary({
+  failures: failuresProp,
+}: {
+  failures?: FailedStartup[];
+}) {
+  const failures = failuresProp ?? FAILURES;
   const [search, setSearch] = useState("");
   const [failureMode, setFailureMode] = useState<FailureMode | "All">("All");
   const [category, setCategory] = useState<Category | "All">("All");
   const [sort, setSort] = useState<"funding" | "year" | "ttf">("funding");
 
   const filtered = useMemo(() => {
-    let list = [...FAILURES];
+    let list = [...failures];
     if (search) {
       const q = search.toLowerCase();
       list = list.filter(
@@ -311,11 +316,11 @@ export default function FailureLibrary() {
       list.sort((a, b) => b.timeToFailureMonths - a.timeToFailureMonths);
     }
     return list;
-  }, [search, failureMode, category, sort]);
+  }, [failures, search, failureMode, category, sort]);
 
   return (
     <div>
-      <FailureStats />
+      <FailureStats failures={failures} />
 
       {/* Filters */}
       <div

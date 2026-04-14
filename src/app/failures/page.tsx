@@ -1,6 +1,24 @@
 "use client";
+import { useEffect, useState } from "react";
 import FailureLibrary from "@/components/FailureLibrary";
+import { FAILURES, type FailedStartup } from "@/lib/data";
+
 export default function FailuresPage() {
+  const [failures, setFailures] = useState<FailedStartup[]>(FAILURES);
+
+  useEffect(() => {
+    fetch("/api/failures")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.failures && data.failures.length > 0) {
+          setFailures(data.failures as FailedStartup[]);
+        }
+      })
+      .catch(() => {
+        // fallback to mock data already set
+      });
+  }, []);
+
   return (
     <div
       className="min-h-screen px-4 py-6 sm:px-6 sm:py-8"
@@ -12,7 +30,7 @@ export default function FailuresPage() {
       >
         Failure Library
       </h1>
-      <FailureLibrary />
+      <FailureLibrary failures={failures} />
     </div>
   );
 }

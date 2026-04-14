@@ -246,7 +246,11 @@ function IdeaCard({ idea }: { idea: StartupIdea }) {
   );
 }
 
-export default function IdeasDatabase() {
+export default function IdeasDatabase({
+  ideas: ideasProp,
+}: {
+  ideas?: StartupIdea[];
+} = {}) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState<Category | "All">("All");
   const [source, setSource] = useState<Source | "All">("All");
@@ -254,7 +258,7 @@ export default function IdeasDatabase() {
   const [sort, setSort] = useState<"score" | "alpha">("score");
 
   const filtered = useMemo(() => {
-    let list = [...IDEAS];
+    let list = [...(ideasProp ?? IDEAS)];
     if (search) {
       const q = search.toLowerCase();
       list = list.filter(
@@ -270,7 +274,7 @@ export default function IdeasDatabase() {
       list.sort((a, b) => b.launchabilityScore - a.launchabilityScore);
     else list.sort((a, b) => a.title.localeCompare(b.title));
     return list;
-  }, [search, category, source, trend, sort]);
+  }, [search, category, source, trend, sort, ideasProp]);
 
   return (
     <div>
