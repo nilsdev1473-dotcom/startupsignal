@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase";
 
-const OLLAMA_BASE = "http://localhost:11434";
+const OLLAMA_BASE = "http://187.77.175.61:11434";
 const MODEL = "qwen2.5:7b";
 
 function buildPrompt(
