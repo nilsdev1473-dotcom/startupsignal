@@ -1,8 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { staggerContainer } from "@/lib/animations";
-
 type FailureMode =
   | "PMF"
   | "Timing"
@@ -89,25 +86,14 @@ function FundingBadge({ amount }: { amount: string }) {
   );
 }
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 8 },
-  visible: { opacity: 1, y: 0 },
-};
-
 export function FailureGraveyard({ failures }: FailureGraveyardProps) {
   return (
-    <motion.ul
-      variants={staggerContainer}
-      initial="hidden"
-      animate="visible"
-      className="list-none m-0 p-0"
-    >
+    <ul className="list-none m-0 p-0">
       {failures.map((failure, index) => (
-        <motion.li
+        <li
           key={`${failure.name}-${index}`}
-          variants={itemVariants}
-          transition={{ duration: 0.25, ease: "easeOut" }}
-          className="bg-[#1A1A1D] rounded-lg p-4 border border-white/[0.08] mb-2"
+          className="fade-in-up bg-[#1A1A1D] rounded-lg p-4 border border-white/[0.08] mb-2"
+          style={{ animationDelay: `${index * 0.05}s` }}
         >
           <div className="flex items-start justify-between gap-3">
             {/* Left: name + cause */}
@@ -131,9 +117,9 @@ export function FailureGraveyard({ failures }: FailureGraveyardProps) {
               <FundingBadge amount={failure.fundingRaised} />
             </div>
           </div>
-        </motion.li>
+        </li>
       ))}
-    </motion.ul>
+    </ul>
   );
 }
 

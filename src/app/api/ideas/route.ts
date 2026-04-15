@@ -1,9 +1,14 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { IDEAS } from "@/lib/data";
 import { createServerSupabase } from "@/lib/supabase";
 
 export async function GET() {
   const sb = createServerSupabase();
+  if (!sb) {
+    return NextResponse.json({ ideas: [], error: "No database connection" });
+  }
   const { data, error } = await sb
     .from("yc_ideas")
     .select("*")

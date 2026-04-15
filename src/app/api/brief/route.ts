@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase";
 
@@ -75,6 +77,12 @@ export async function POST(req: Request) {
   };
 
   const sb = createServerSupabase();
+  if (!sb)
+    return NextResponse.json({
+      brief: null,
+      error: "No database",
+      pending: true,
+    });
 
   // Check cache
   const { data: existing } = await sb

@@ -1,6 +1,5 @@
 "use client";
 
-import { animate, useMotionValue, useTransform } from "framer-motion";
 import { useEffect, useState } from "react";
 import { STATS } from "@/lib/data";
 
@@ -21,24 +20,29 @@ function AnimatedNumber({
   delay: number;
   suffix?: string;
 }) {
-  const motionVal = useMotionValue(0);
-  const rounded = useTransform(motionVal, (v) => Math.round(v));
   const [display, setDisplay] = useState(0);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
-      const controls = animate(motionVal, target, {
-        duration: 1.4,
-        ease: [0.16, 1, 0.3, 1],
-      });
-      return () => controls.stop();
-    }, delay);
-    return () => clearTimeout(timeout);
-  }, [target, delay, motionVal]);
+      const duration = 1400;
+      const start = performance.now();
 
-  useEffect(() => {
-    return rounded.on("change", (v) => setDisplay(v));
-  }, [rounded]);
+      function tick(now: number) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        // ease-out cubic
+        const eased = 1 - (1 - progress) ** 3;
+        setDisplay(Math.round(eased * target));
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        }
+      }
+
+      requestAnimationFrame(tick);
+    }, delay);
+
+    return () => clearTimeout(timeout);
+  }, [target, delay]);
 
   return (
     <span>

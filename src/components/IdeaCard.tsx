@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import MarketHeatingChartDynamic from "@/components/charts/MarketHeatingChartDynamic";
 import ExecutionBrief from "@/components/ExecutionBrief";
@@ -123,8 +122,7 @@ export function IdeaCard({ idea, rank, isExpanded, onToggle }: IdeaCardProps) {
   const summary = twoSentenceSummary(idea.description);
 
   return (
-    <motion.div
-      layout
+    <div
       className={[
         "bg-[#111113] border border-white/[0.08] rounded-2xl p-6",
         "hover:border-white/20 transition-all duration-200",
@@ -200,100 +198,81 @@ export function IdeaCard({ idea, rank, isExpanded, onToggle }: IdeaCardProps) {
         </button>
       </div>
 
-      {/* ── Expanded panel ── */}
-      <AnimatePresence initial={false}>
-        {isExpanded && (
-          <motion.div
-            key="expanded"
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-            className="overflow-hidden"
-          >
-            <div className="flex flex-col gap-6 pt-2">
-              {/* Divider */}
-              <div className="h-px bg-white/[0.06]" />
+      {/* ── Expanded panel — CSS max-height transition ── */}
+      <div className={`collapsible ${isExpanded ? "open" : ""}`}>
+        <div className="flex flex-col gap-6 pt-2">
+          {/* Divider */}
+          <div className="h-px bg-white/[0.06]" />
 
-              {/* ── Score bars ── */}
-              <div>
-                <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">
-                  Score Breakdown
-                </h4>
-                <div className="flex flex-col gap-2.5">
-                  {scoreDimensions.map(({ key, label }) => {
-                    const val = idea.scores[key];
-                    return (
-                      <div key={key} className="flex items-center gap-3">
-                        <span className="w-32 shrink-0 text-xs text-white/60 leading-tight">
-                          {label}
-                        </span>
-                        <div className="flex-1 bg-white/10 rounded-full h-2 overflow-hidden">
-                          <motion.div
-                            className={`h-full rounded-full ${scoreBarColor(val)}`}
-                            initial={{ width: 0 }}
-                            animate={{ width: `${val}%` }}
-                            transition={{
-                              duration: 0.5,
-                              ease: "easeOut",
-                              delay: 0.1,
-                            }}
-                          />
-                        </div>
-                        <span className="w-8 text-right text-xs font-mono tabular-nums text-white/60">
-                          {val}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* ── Business plan summary ── */}
-              <div>
-                <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-2">
-                  Business Case
-                </h4>
-                <p className="text-sm text-white/70 leading-relaxed">
-                  {summary}
-                </p>
-              </div>
-
-              {/* ── Market heating chart ── */}
-              <div>
-                <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">
-                  Signal Momentum (12 Weeks)
-                </h4>
-                <MarketHeatingChartDynamic weeklyScores={idea.weeklyScores} />
-              </div>
-
-              {/* ── Failure graveyard ── */}
-              {idea.failureGraveyard.length > 0 && (
-                <div>
-                  <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">
-                    Failure Graveyard
-                  </h4>
-                  <FailureGraveyard failures={idea.failureGraveyard} />
-                </div>
-              )}
-
-              {/* ── Execution Brief (Qwen AI) ── */}
-              <div>
-                <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">
-                  Execution Brief
-                </h4>
-                <ExecutionBrief
-                  ideaId={idea.id}
-                  title={idea.title}
-                  description={idea.description}
-                  category={idea.category}
-                />
-              </div>
+          {/* ── Score bars ── */}
+          <div>
+            <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">
+              Score Breakdown
+            </h4>
+            <div className="flex flex-col gap-2.5">
+              {scoreDimensions.map(({ key, label }) => {
+                const val = idea.scores[key];
+                return (
+                  <div key={key} className="flex items-center gap-3">
+                    <span className="w-32 shrink-0 text-xs text-white/60 leading-tight">
+                      {label}
+                    </span>
+                    <div className="flex-1 bg-white/10 rounded-full h-2 overflow-hidden">
+                      <div
+                        className={`h-full rounded-full ${scoreBarColor(val)}`}
+                        style={{ width: `${val}%` }}
+                      />
+                    </div>
+                    <span className="w-8 text-right text-xs font-mono tabular-nums text-white/60">
+                      {val}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+          </div>
+
+          {/* ── Business plan summary ── */}
+          <div>
+            <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-2">
+              Business Case
+            </h4>
+            <p className="text-sm text-white/70 leading-relaxed">{summary}</p>
+          </div>
+
+          {/* ── Market heating chart ── */}
+          <div>
+            <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">
+              Signal Momentum (12 Weeks)
+            </h4>
+            <MarketHeatingChartDynamic weeklyScores={idea.weeklyScores} />
+          </div>
+
+          {/* ── Failure graveyard ── */}
+          {idea.failureGraveyard.length > 0 && (
+            <div>
+              <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">
+                Failure Graveyard
+              </h4>
+              <FailureGraveyard failures={idea.failureGraveyard} />
+            </div>
+          )}
+
+          {/* ── Execution Brief (Qwen AI) ── */}
+          <div>
+            <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">
+              Execution Brief
+            </h4>
+            <ExecutionBrief
+              ideaId={idea.id}
+              title={idea.title}
+              description={idea.description}
+              category={idea.category}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 

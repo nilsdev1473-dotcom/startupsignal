@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useState } from "react";
 import { IdeaCard } from "@/components/IdeaCard";
 import { IDEAS } from "@/lib/data";
@@ -10,23 +9,7 @@ const TOP_IDEAS = [...IDEAS]
   .sort((a, b) => b.launchabilityScore - a.launchabilityScore)
   .slice(0, 3);
 
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.04,
-    },
-  },
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.35, ease: "easeOut" as const },
-  },
-};
+const delayClasses = ["fade-in-up-1", "fade-in-up-2", "fade-in-up-3"];
 
 export function HeroLeaderboard() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -49,23 +32,18 @@ export function HeroLeaderboard() {
       </div>
 
       {/* Grid */}
-      <motion.div
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-1 lg:grid-cols-3 gap-4"
-      >
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {TOP_IDEAS.map((idea, index) => (
-          <motion.div key={idea.id} variants={cardVariants}>
+          <div key={idea.id} className={delayClasses[index] ?? "fade-in-up"}>
             <IdeaCard
               idea={idea}
               rank={index + 1}
               isExpanded={expandedId === idea.id}
               onToggle={() => handleToggle(idea.id)}
             />
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
+      </div>
     </section>
   );
 }

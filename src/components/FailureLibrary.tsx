@@ -1,6 +1,5 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
 import { useMemo, useState } from "react";
 import {
   type Category,
@@ -72,16 +71,13 @@ function FailureCard({ failure }: { failure: FailedStartup }) {
   const months = failure.timeToFailureMonths % 12;
 
   return (
-    <motion.div
-      layout
-      className="rounded-xl overflow-hidden cursor-pointer"
+    <div
+      className="rounded-xl overflow-hidden cursor-pointer transition-colors duration-150"
       style={{
         backgroundColor: "#111113",
-        border: "1px solid rgba(255,255,255,0.08)",
+        border: `1px solid ${open ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.08)"}`,
       }}
       onClick={() => setOpen((v) => !v)}
-      whileHover={{ borderColor: "rgba(255,255,255,0.15)" }}
-      transition={{ duration: 0.15 }}
     >
       <div className="p-5">
         {/* Header */}
@@ -163,49 +159,39 @@ function FailureCard({ failure }: { failure: FailedStartup }) {
               raised before failure
             </span>
           </div>
-          <motion.span
-            className="text-xs"
-            style={{ color: "rgba(255,255,255,0.25)" }}
-            animate={{ rotate: open ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
+          <span
+            className="text-xs transition-transform duration-200 inline-block"
+            style={{
+              color: "rgba(255,255,255,0.25)",
+              transform: open ? "rotate(180deg)" : "rotate(0deg)",
+            }}
           >
             ▼
-          </motion.span>
+          </span>
         </div>
       </div>
 
-      {/* Post-mortem */}
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            key="expand"
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
-            className="overflow-hidden"
+      {/* Post-mortem — CSS max-height collapsible */}
+      <div className={`collapsible ${open ? "open" : ""}`}>
+        <div
+          className="px-5 pb-5"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+        >
+          <p
+            className="text-[10px] uppercase tracking-widest pt-4 mb-2"
+            style={{ color: "rgba(255,255,255,0.35)" }}
           >
-            <div
-              className="px-5 pb-5"
-              style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
-            >
-              <p
-                className="text-[10px] uppercase tracking-widest pt-4 mb-2"
-                style={{ color: "rgba(255,255,255,0.35)" }}
-              >
-                Post-Mortem
-              </p>
-              <p
-                className="text-xs leading-relaxed"
-                style={{ color: "rgba(255,255,255,0.65)" }}
-              >
-                {failure.postMortem}
-              </p>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+            Post-Mortem
+          </p>
+          <p
+            className="text-xs leading-relaxed"
+            style={{ color: "rgba(255,255,255,0.65)" }}
+          >
+            {failure.postMortem}
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -250,16 +236,9 @@ function FailureStats({ failures }: { failures: FailedStartup[] }) {
                   className="flex-1 h-1.5 rounded-full overflow-hidden"
                   style={{ backgroundColor: "rgba(255,255,255,0.06)" }}
                 >
-                  <motion.div
+                  <div
                     className="h-full rounded-full"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${pct}%` }}
-                    transition={{
-                      duration: 0.8,
-                      delay: 0.1,
-                      ease: [0.16, 1, 0.3, 1],
-                    }}
-                    style={{ backgroundColor: fm.text }}
+                    style={{ width: `${pct}%`, backgroundColor: fm.text }}
                   />
                 </div>
                 <span
@@ -458,35 +437,25 @@ export default function FailureLibrary({
         </span>
       </div>
 
-      <AnimatePresence mode="popLayout">
-        <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
-          {filtered.map((failure, i) => (
-            <motion.div
-              key={failure.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.97 }}
-              transition={{
-                duration: 0.25,
-                delay: i * 0.025,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-            >
-              <FailureCard failure={failure} />
-            </motion.div>
-          ))}
-          {filtered.length === 0 && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="col-span-2 text-center py-12 text-sm"
-              style={{ color: "rgba(255,255,255,0.3)" }}
-            >
-              No failures match your filters.
-            </motion.p>
-          )}
-        </div>
-      </AnimatePresence>
+      <div className="grid grid-cols-1 gap-3 lg:grid-cols-2">
+        {filtered.map((failure, i) => (
+          <div
+            key={failure.id}
+            className="fade-in-up"
+            style={{ animationDelay: `${i * 0.025}s` }}
+          >
+            <FailureCard failure={failure} />
+          </div>
+        ))}
+        {filtered.length === 0 && (
+          <p
+            className="fade-in-up col-span-2 text-center py-12 text-sm"
+            style={{ color: "rgba(255,255,255,0.3)" }}
+          >
+            No failures match your filters.
+          </p>
+        )}
+      </div>
     </div>
   );
 }
