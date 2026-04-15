@@ -3,32 +3,11 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase";
 
-const OLLAMA_BASE = "http://187.77.175.61:11434";
-const MODEL = "qwen2.5:7b";
-
-function buildPrompt(
-  title: string,
-  description: string,
-  category: string,
-): string {
-  return `You are an expert startup advisor. Analyze this startup idea and provide a structured execution brief.
-
-Idea: ${title}
-Description: ${description}
-Category: ${category}
-
-Respond ONLY with valid JSON in this exact format:
-{
-  "founding_team": "Description of roles needed and key skills (2-3 sentences)",
-  "realistic_funding": "Specific funding range with explanation (e.g. '$50K-200K bootstrappable, or $500K-2M seed round')",
-  "time_to_revenue": "Realistic time estimate with explanation (e.g. '6-12 months to first paying customer')",
-  "core_components": ["Component 1", "Component 2", "Component 3", "Component 4", "Component 5"],
-  "key_risks": ["Risk 1 specific to this idea", "Risk 2", "Risk 3"],
-  "why_now": "2-3 sentences on market timing and why this moment is right",
-  "path_to_profitability": "Realistic path with key milestones (2-3 sentences)",
-  "tip": "Practical note for a solo technical founder with a modern web stack (Next.js, Supabase, Vercel), limited budget but AI capabilities. What makes this accessible or not accessible as a solo build?"
-}`;
-}
+// VPS brief service — persistent, no serverless timeout
+const BRIEF_API =
+  process.env.BRIEF_API_URL ??
+  "https://startupsignal-api.srv1453036.hstgr.cloud";
+const BRIEF_API_KEY = process.env.BRIEF_API_KEY ?? "";
 
 interface ExecutionBrief {
   founding_team: string;
@@ -56,6 +35,13 @@ function isValidBrief(data: unknown): data is ExecutionBrief {
   );
 }
 
+function apiHeaders(): Record<string, string> {
+  return {
+    "Content-Type": "application/json",
+    ...(BRIEF_API_KEY ? { "X-API-Key": BRIEF_API_KEY } : {}),
+  };
+}
+
 export async function POST(req: Request) {
   const body: unknown = await req.json();
   if (
@@ -76,73 +62,80 @@ export async function POST(req: Request) {
     category: string;
   };
 
+  // 1. Check Supabase cache (when service key is valid)
   const sb = createServerSupabase();
-  if (!sb)
-    return NextResponse.json({
-      brief: null,
-      error: "No database",
-      pending: true,
-    });
+  if (sb) {
+    const { data: existing } = await sb
+      .from("yc_ideas")
+      .select("execution_brief")
+      .eq("id", idea_id)
+      .single();
 
-  // Check cache
-  const { data: existing } = await sb
-    .from("yc_ideas")
-    .select("execution_brief")
-    .eq("id", idea_id)
-    .single();
-
-  if (existing?.execution_brief) {
-    return NextResponse.json({ brief: existing.execution_brief, cached: true });
+    if (existing?.execution_brief && isValidBrief(existing.execution_brief)) {
+      return NextResponse.json({
+        brief: existing.execution_brief,
+        cached: true,
+        source: "supabase",
+      });
+    }
   }
 
-  const prompt = buildPrompt(title, description, category);
-
+  // 2. Check VPS local cache (fast — always works regardless of Supabase key)
   try {
-    const ollamaResp = await fetch(`${OLLAMA_BASE}/api/generate`, {
+    const vpsRead = await fetch(
+      `${BRIEF_API}/brief/${encodeURIComponent(idea_id)}`,
+      {
+        headers: apiHeaders(),
+        signal: AbortSignal.timeout(8000),
+      },
+    );
+    if (vpsRead.ok) {
+      const vpsData = (await vpsRead.json()) as {
+        brief: unknown;
+        cached: boolean;
+      };
+      if (vpsData.cached && isValidBrief(vpsData.brief)) {
+        // Back-fill Supabase if possible
+        if (sb) {
+          void sb
+            .from("yc_ideas")
+            .update({ execution_brief: vpsData.brief })
+            .eq("id", idea_id);
+        }
+        return NextResponse.json({
+          brief: vpsData.brief,
+          cached: true,
+          source: "vps",
+        });
+      }
+    }
+  } catch {
+    // VPS cache read failed — continue to trigger
+  }
+
+  // 3. Cache miss on both — trigger async generation on VPS (returns immediately)
+  try {
+    const trigger = await fetch(`${BRIEF_API}/brief/trigger`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: MODEL,
-        prompt,
-        stream: false,
-        format: "json",
-      }),
-      signal: AbortSignal.timeout(60000),
+      headers: apiHeaders(),
+      body: JSON.stringify({ idea_id, title, description, category }),
+      signal: AbortSignal.timeout(10000),
     });
-
-    if (!ollamaResp.ok) {
-      throw new Error(`Ollama returned ${ollamaResp.status}`);
+    if (!trigger.ok) {
+      throw new Error(`VPS trigger returned ${trigger.status}`);
     }
-
-    const ollamaData: unknown = await ollamaResp.json();
-
-    if (
-      typeof ollamaData !== "object" ||
-      ollamaData === null ||
-      typeof (ollamaData as Record<string, unknown>).response !== "string"
-    ) {
-      throw new Error("Unexpected Ollama response shape");
-    }
-
-    const responseText = (ollamaData as { response: string }).response;
-    const parsed: unknown = JSON.parse(responseText);
-
-    if (!isValidBrief(parsed)) {
-      throw new Error("Ollama response did not match ExecutionBrief schema");
-    }
-
-    // Cache in Supabase
-    await sb
-      .from("yc_ideas")
-      .update({ execution_brief: parsed })
-      .eq("id", idea_id);
-
-    return NextResponse.json({ brief: parsed, cached: false });
   } catch {
     return NextResponse.json({
       brief: null,
-      error: "Brief generation pending — AI model loading",
+      error: "Brief service unavailable — try again shortly",
       pending: true,
     });
   }
+
+  // 4. Triggered successfully — tell frontend to poll in ~2 minutes
+  return NextResponse.json({
+    brief: null,
+    pending: true,
+    message: "Brief generating — ready in ~2 minutes. Check back soon.",
+  });
 }

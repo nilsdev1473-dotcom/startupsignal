@@ -1,18 +1,10 @@
+import { GeistMono } from "geist/font/mono";
+import { GeistSans } from "geist/font/sans";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import BottomNav from "@/components/BottomNav";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import Sidebar from "@/components/Sidebar";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   title: "StartupSignal — Intelligence Dashboard",
@@ -29,7 +21,7 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${GeistSans.variable} ${GeistMono.variable} h-full antialiased`}
     >
       <body
         suppressHydrationWarning
@@ -41,7 +33,7 @@ export default function RootLayout({
           className="lg:ml-60 min-h-screen pb-16 lg:pb-0"
           style={{ backgroundColor: "#0A0A0B" }}
         >
-          {children}
+          <ErrorBoundary>{children}</ErrorBoundary>
         </main>
         <BottomNav />
       </body>

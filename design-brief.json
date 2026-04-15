@@ -1,0 +1,11 @@
+{
+  "accent_color": "#F59E0B",
+  "accent_name": "amber",
+  "font_primary": "Space Grotesk",
+  "font_mono": "JetBrains Mono",
+  "personality": "dev-tool",
+  "tagline": "Signal meets pattern recognition: where startup momentum meets market gravity",
+  "bg_primary": "#0A0F1A",
+  "bg_surface": "#0F1419",
+  "bg_elevated": "#141921"
+}
