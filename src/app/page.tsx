@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import HeroLeaderboard from "@/components/HeroLeaderboard";
-import StatsStrip from "@/components/StatsStrip";
+import HeroLeaderboard from "@/components/HeroLeaderboardDynamic";
+import StatsStrip from "@/components/StatsStripDynamic";
 import type { StartupIdea } from "@/lib/data";
 
 export default function Home() {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import IdeasDatabase from "@/components/IdeasDatabase";
+import IdeasDatabase from "@/components/IdeasDatabaseDynamic";
 import { IDEAS, type StartupIdea } from "@/lib/data";
 
 export default function IdeasPage() {

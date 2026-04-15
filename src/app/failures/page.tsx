@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import FailureLibrary from "@/components/FailureLibrary";
+import FailureLibrary from "@/components/FailureLibraryDynamic";
 import { FAILURES, type FailedStartup } from "@/lib/data";
 
 export default function FailuresPage() {
