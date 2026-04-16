@@ -3,7 +3,6 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase";
 
-// VPS brief service — persistent, no serverless timeout
 const BRIEF_API =
   process.env.BRIEF_API_URL ??
   "https://startupsignal-api.srv1453036.hstgr.cloud";
@@ -35,7 +34,7 @@ function isValidBrief(data: unknown): data is ExecutionBrief {
   );
 }
 
-function apiHeaders(): Record<string, string> {
+function vpsHeaders(): Record<string, string> {
   return {
     "Content-Type": "application/json",
     ...(BRIEF_API_KEY ? { "X-API-Key": BRIEF_API_KEY } : {}),
@@ -49,10 +48,7 @@ export async function POST(req: Request) {
     body === null ||
     typeof (body as Record<string, unknown>).idea_id !== "string"
   ) {
-    return NextResponse.json(
-      { error: "Invalid request body" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
   const { idea_id, title, description, category } = body as {
@@ -62,40 +58,42 @@ export async function POST(req: Request) {
     category: string;
   };
 
-  // 1. Check Supabase cache (when service key is valid)
+  // 1. Check Supabase — fast (220ms), has pre-generated briefs for all 15 ideas
   const sb = createServerSupabase();
   if (sb) {
-    const { data: existing } = await sb
-      .from("yc_ideas")
-      .select("execution_brief")
-      .eq("id", idea_id)
-      .single();
+    try {
+      const { data: existing } = await sb
+        .from("yc_ideas")
+        .select("execution_brief")
+        .eq("id", idea_id)
+        .single();
 
-    if (existing?.execution_brief && isValidBrief(existing.execution_brief)) {
-      return NextResponse.json({
-        brief: existing.execution_brief,
-        cached: true,
-        source: "supabase",
-      });
+      if (existing?.execution_brief && isValidBrief(existing.execution_brief)) {
+        return NextResponse.json({
+          brief: existing.execution_brief,
+          cached: true,
+          source: "supabase",
+        });
+      }
+    } catch {
+      // Supabase unavailable — fall through to VPS
     }
   }
 
-  // 2. Check VPS local cache (fast — always works regardless of Supabase key)
+  // 2. Supabase miss or unavailable — call VPS synchronously (Groq is fast, ~2s)
+  // This generates AND caches, back-filling Supabase for next time
   try {
-    const vpsRead = await fetch(
-      `${BRIEF_API}/brief/${encodeURIComponent(idea_id)}`,
-      {
-        headers: apiHeaders(),
-        signal: AbortSignal.timeout(8000),
-      },
-    );
-    if (vpsRead.ok) {
-      const vpsData = (await vpsRead.json()) as {
-        brief: unknown;
-        cached: boolean;
-      };
-      if (vpsData.cached && isValidBrief(vpsData.brief)) {
-        // Back-fill Supabase if possible
+    const vpsResp = await fetch(`${BRIEF_API}/brief`, {
+      method: "POST",
+      headers: vpsHeaders(),
+      body: JSON.stringify({ idea_id, title, description, category }),
+      signal: AbortSignal.timeout(25000), // Groq takes ~2s, generous budget
+    });
+
+    if (vpsResp.ok) {
+      const vpsData = (await vpsResp.json()) as { brief: unknown; cached?: boolean; source?: string };
+      if (isValidBrief(vpsData.brief)) {
+        // Back-fill Supabase
         if (sb) {
           void sb
             .from("yc_ideas")
@@ -104,38 +102,17 @@ export async function POST(req: Request) {
         }
         return NextResponse.json({
           brief: vpsData.brief,
-          cached: true,
+          cached: vpsData.cached ?? false,
           source: "vps",
         });
       }
     }
   } catch {
-    // VPS cache read failed — continue to trigger
+    // VPS call failed
   }
 
-  // 3. Cache miss on both — trigger async generation on VPS (returns immediately)
-  try {
-    const trigger = await fetch(`${BRIEF_API}/brief/trigger`, {
-      method: "POST",
-      headers: apiHeaders(),
-      body: JSON.stringify({ idea_id, title, description, category }),
-      signal: AbortSignal.timeout(10000),
-    });
-    if (!trigger.ok) {
-      throw new Error(`VPS trigger returned ${trigger.status}`);
-    }
-  } catch {
-    return NextResponse.json({
-      brief: null,
-      error: "Brief service unavailable — try again shortly",
-      pending: true,
-    });
-  }
-
-  // 4. Triggered successfully — tell frontend to poll in ~2 minutes
   return NextResponse.json({
     brief: null,
-    pending: true,
-    message: "Brief generating — ready in ~2 minutes. Check back soon.",
+    error: "Brief generation failed — try again",
   });
 }

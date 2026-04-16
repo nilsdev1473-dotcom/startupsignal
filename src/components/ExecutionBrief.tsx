@@ -65,8 +65,11 @@ export default function ExecutionBrief({
       if (data.brief) {
         setBrief(data.brief);
         setCached(data.cached ?? false);
+      } else if (data.pending) {
+        // Trigger queued — poll for result
+        setError("Generating in background — click again in ~10 seconds");
       } else {
-        setError(data.error ?? "Unknown error");
+        setError(data.error ?? "Generation failed — try again");
       }
     } catch {
       setError("Failed to reach server");
