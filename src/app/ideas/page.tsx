@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import IdeasDatabase from "@/components/IdeasDatabaseDynamic";
-import { IDEAS, type StartupIdea } from "@/lib/data";
+import type { StartupIdea } from "@/types";
 
 export default function IdeasPage() {
-  const [ideas, setIdeas] = useState<StartupIdea[]>(IDEAS); // start with mock
+  const [ideas, setIdeas] = useState<StartupIdea[]>([]); // start with mock
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

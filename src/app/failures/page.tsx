@@ -1,10 +1,10 @@
 "use client";
 import { useEffect, useState } from "react";
 import FailureLibrary from "@/components/FailureLibraryDynamic";
-import { FAILURES, type FailedStartup } from "@/lib/data";
+import type { FailedStartup } from "@/types";
 
 export default function FailuresPage() {
-  const [failures, setFailures] = useState<FailedStartup[]>(FAILURES);
+  const [failures, setFailures] = useState<FailedStartup[]>([]);
 
   useEffect(() => {
     fetch("/api/failures")

@@ -48,7 +48,10 @@ export async function POST(req: Request) {
     body === null ||
     typeof (body as Record<string, unknown>).idea_id !== "string"
   ) {
-    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 },
+    );
   }
 
   const { idea_id, title, description, category } = body as {
@@ -91,7 +94,11 @@ export async function POST(req: Request) {
     });
 
     if (vpsResp.ok) {
-      const vpsData = (await vpsResp.json()) as { brief: unknown; cached?: boolean; source?: string };
+      const vpsData = (await vpsResp.json()) as {
+        brief: unknown;
+        cached?: boolean;
+        source?: string;
+      };
       if (isValidBrief(vpsData.brief)) {
         // Back-fill Supabase
         if (sb) {

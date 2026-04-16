@@ -2,44 +2,63 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { createServerSupabase } from "@/lib/supabase";
+import type { Category, FailedStartup, FailureMode } from "@/types";
+
+const VALID_MODES = new Set<FailureMode>([
+  "PMF",
+  "Timing",
+  "Team",
+  "Market",
+  "Competition",
+  "UnitEconomics",
+  "Regulatory",
+]);
+const VALID_CATS = new Set<Category>([
+  "AI",
+  "Fintech",
+  "Healthtech",
+  "Marketplace",
+  "ClimaTech",
+  "DevTools",
+  "Biotech",
+  "Other",
+]);
 
 export async function GET() {
   const sb = createServerSupabase();
   if (!sb) {
-    return NextResponse.json({ ideas: [], error: "No database connection" });
+    return NextResponse.json({ failures: [], error: "No database connection" });
   }
+
   const { data, error } = await sb
     .from("startup_failures")
     .select("*")
-    .order("year_failed", { ascending: false, nullsFirst: false })
-    .limit(50);
+    .not("failure_mode", "is", null)
+    .not("company_name", "is", null)
+    .order("year_failed", { ascending: false, nullsFirst: false });
 
-  if (error) return NextResponse.json({ failures: [], error: error.message });
+  if (error) {
+    return NextResponse.json({ failures: [], error: error.message });
+  }
 
-  const VALID_FAILURE_MODES = new Set(["PMF", "Timing", "Team", "Market", "Competition", "UnitEconomics", "Regulatory"]);
-  const VALID_CATEGORIES = new Set(["AI Devtools", "Fintech", "Healthtech", "Marketplace", "Climate", "Edtech"]);
-
-  const failures = (data || [])
-    .filter((row: Record<string, unknown>) =>
-      // Skip garbage rows without essential data
-      typeof row.company_name === "string" &&
-      row.company_name.length > 2 &&
-      row.failure_mode !== null &&
-      row.failure_mode !== undefined
+  const failures: FailedStartup[] = (data || [])
+    .filter(
+      (row) =>
+        typeof row.company_name === "string" && row.company_name.length > 2,
     )
-    .map((row: Record<string, unknown>) => {
-      const rawMode = (row.failure_mode as string) || "PMF";
-      const rawCat = (row.category as string) || "AI Devtools";
+    .map((row) => {
+      const rawMode = String(row.failure_mode ?? "PMF") as FailureMode;
+      const rawCat = String(row.category ?? "Other") as Category;
       return {
-        id: row.id,
-        name: row.company_name,
-        year: (row.year_failed as number) || (row.year_founded as number) || 2020,
-        fundingRaised: (row.funding_raised as string) || "Unknown",
-        timeToFailureMonths: 36,
-        failureMode: VALID_FAILURE_MODES.has(rawMode) ? rawMode : "PMF",
-        cause: (row.post_mortem as string)?.slice(0, 120) || "No data available",
-        postMortem: (row.post_mortem as string) || "",
-        category: VALID_CATEGORIES.has(rawCat) ? rawCat : "AI Devtools",
+        id: String(row.id),
+        name: String(row.company_name),
+        year: Number(row.year_failed ?? row.year_founded ?? 2020),
+        fundingRaised: String(row.funding_raised ?? "Unknown"),
+        timeToFailureMonths: Number(row.time_to_failure_months ?? 36),
+        failureMode: VALID_MODES.has(rawMode) ? rawMode : "PMF",
+        cause: String(row.post_mortem ?? "").slice(0, 120),
+        postMortem: String(row.post_mortem ?? ""),
+        category: VALID_CATS.has(rawCat) ? rawCat : "Other",
       };
     });
 

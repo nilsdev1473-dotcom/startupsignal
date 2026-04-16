@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import type { StartupIdea } from "@/lib/data";
+import type { StartupIdea } from "@/types";
 
 type SortKey = "score" | "title" | "category";
 

@@ -1,7 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { STATS } from "@/lib/data";
+
+const STATS = {
+  totalIdeas: 15,
+  totalFailures: 20,
+  avgScore: 78,
+  topCategory: "AI",
+};
 
 interface KpiCardProps {
   label: string;

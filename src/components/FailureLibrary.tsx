@@ -1,12 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import {
-  type Category,
-  FAILURES,
-  type FailedStartup,
-  type FailureMode,
-} from "@/lib/data";
+import type { Category, FailedStartup, FailureMode } from "@/types";
 
 const FAILURE_MODES: Array<FailureMode | "All"> = [
   "All",
@@ -21,12 +16,14 @@ const FAILURE_MODES: Array<FailureMode | "All"> = [
 
 const CATEGORIES_FILTER: Array<Category | "All"> = [
   "All",
-  "AI Devtools",
+  "AI",
   "Fintech",
   "Healthtech",
   "Marketplace",
-  "Climate",
-  "Edtech",
+  "ClimaTech",
+  "DevTools",
+  "Biotech",
+  "Other",
 ];
 
 const FAILURE_COLORS: Record<
@@ -55,12 +52,14 @@ const FAILURE_COLORS: Record<
 };
 
 const CATEGORY_COLORS: Record<Category, string> = {
-  "AI Devtools": "#8B5CF6",
+  AI: "#8B5CF6",
   Fintech: "#3B82F6",
   Healthtech: "#10B981",
   Marketplace: "#F59E0B",
-  Climate: "#34D399",
-  Edtech: "#F472B6",
+  ClimaTech: "#34D399",
+  DevTools: "#F472B6",
+  Biotech: "#06B6D4",
+  Other: "#6B7280",
 };
 
 function FailureCard({ failure }: { failure: FailedStartup }) {
@@ -263,7 +262,7 @@ export default function FailureLibrary({
 }: {
   failures?: FailedStartup[];
 }) {
-  const failures = failuresProp ?? FAILURES;
+  const failures = failuresProp ?? [];
   const [search, setSearch] = useState("");
   const [failureMode, setFailureMode] = useState<FailureMode | "All">("All");
   const [category, setCategory] = useState<Category | "All">("All");

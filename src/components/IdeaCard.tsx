@@ -1,10 +1,10 @@
 "use client";
 
 import { ChevronDown, ChevronUp } from "lucide-react";
-import MarketHeatingChartDynamic from "@/components/charts/MarketHeatingChartDynamic";
+// MarketHeatingChart removed — fake data
 import ExecutionBrief from "@/components/ExecutionBrief";
 import FailureGraveyard from "@/components/FailureGraveyard";
-import type { StartupIdea } from "@/lib/data";
+import type { StartupIdea } from "@/types";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -80,8 +80,8 @@ const scoreDimensions: Array<{
   { key: "marketSize", label: "Market Size" },
   { key: "competition", label: "Competition" },
   { key: "techReadiness", label: "Tech Readiness" },
-  { key: "executionComplexity", label: "Execution" },
-  { key: "failureRisk", label: "Failure Risk" },
+  { key: "regulatoryRisk", label: "Regulatory Risk" },
+  { key: "executionDifficulty", label: "Execution" },
 ];
 
 // ─── Business plan summary (first 2 sentences) ───────────────────────────────
@@ -93,12 +93,12 @@ function twoSentenceSummary(text: string): string {
 
 // ─── Trend badge ──────────────────────────────────────────────────────────────
 
-function TrendBadge({ trend }: { trend: StartupIdea["trend"] }) {
+function TrendBadge({ trend }: { trend?: string }) {
   const config = {
     up: { icon: "↑", color: "text-emerald-400 bg-emerald-500/10" },
     down: { icon: "↓", color: "text-red-400 bg-red-500/10" },
     stable: { icon: "→", color: "text-white/40 bg-white/[0.06]" },
-  }[trend];
+  }[trend ?? "stable"] ?? { icon: "→", color: "text-white/40 bg-white/[0.06]" };
 
   return (
     <span
@@ -167,7 +167,7 @@ export function IdeaCard({ idea, rank, isExpanded, onToggle }: IdeaCardProps) {
 
         {/* Badges row */}
         <div className="flex flex-wrap items-center gap-2">
-          <TrendBadge trend={idea.trend} />
+          <TrendBadge trend="stable" />
           <span
             className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${srcClass}`}
           >
@@ -240,12 +240,41 @@ export function IdeaCard({ idea, rank, isExpanded, onToggle }: IdeaCardProps) {
             <p className="text-sm text-white/70 leading-relaxed">{summary}</p>
           </div>
 
-          {/* ── Market heating chart ── */}
+          {/* ── Score breakdown ── */}
           <div>
             <h4 className="text-xs font-semibold text-white/40 uppercase tracking-widest mb-3">
-              Signal Momentum (12 Weeks)
+              Score Breakdown
             </h4>
-            <MarketHeatingChartDynamic weeklyScores={idea.weeklyScores} />
+            <div className="space-y-2">
+              {(
+                [
+                  { key: "marketTiming", label: "Market Timing" },
+                  { key: "marketSize", label: "Market Size" },
+                  { key: "competition", label: "Competition" },
+                  { key: "techReadiness", label: "Tech Readiness" },
+                  { key: "regulatoryRisk", label: "Regulatory Risk" },
+                  { key: "executionDifficulty", label: "Execution" },
+                ] as const
+              ).map(({ key, label }) => {
+                const val = idea.scores?.[key] ?? 70;
+                return (
+                  <div key={key} className="flex items-center gap-2">
+                    <span className="text-[10px] w-28 shrink-0 text-white/40">
+                      {label}
+                    </span>
+                    <div className="flex-1 h-1 rounded-full bg-white/5">
+                      <div
+                        className="h-full rounded-full bg-emerald-500"
+                        style={{ width: `${val}%` }}
+                      />
+                    </div>
+                    <span className="text-[10px] w-6 text-right text-white/40">
+                      {val}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           {/* ── Failure graveyard ── */}
