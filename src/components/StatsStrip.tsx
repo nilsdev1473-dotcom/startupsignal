@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 
 const STATS = {
-  totalIdeas: 15,
-  totalFailures: 20,
-  avgScore: 78,
+  totalIdeas: 105,
+  totalFailures: 925,
+  avgScore: 74,
   topCategory: "AI",
 };
 
