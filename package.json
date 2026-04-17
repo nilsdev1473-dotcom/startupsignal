@@ -29,5 +29,11 @@
     "eslint-config-next": "16.2.3",
     "tailwindcss": "^4",
     "typescript": "^5"
-  }
+  },
+  "overrides": {
+    "react-simple-maps": {
+      "react": "19.x"
+    }
+  },
+  "peerDependenciesMeta": {}
 }
