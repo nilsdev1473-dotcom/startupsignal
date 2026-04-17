@@ -106,7 +106,10 @@ function YCIdeaCard({ idea }: { idea: StartupIdea }) {
           }}
         >
           <span style={{ fontSize: 11, color: "rgba(255,255,255,0.3)" }}>
-            YC Request for Startups
+            {idea.source === "yc_rfs" ? "YC Request for Startups" :
+             idea.source === "yc_batch_cluster" ? "YC Batch Signal" :
+             idea.source === "hn_show_hn" ? "HN Show HN" :
+             idea.source === "github_trending" ? "GitHub Trending" : idea.source}
           </span>
           <span
             style={{
@@ -239,7 +242,7 @@ export default function Home() {
       .then((r) => r.json())
       .then((data: { ideas?: StartupIdea[] }) => {
         if (data.ideas) {
-          setYcIdeas(data.ideas.filter((idea) => idea.source === "yc_rfs"));
+          setYcIdeas(data.ideas) // all sources;
         }
       })
       .catch(() => {});
@@ -278,7 +281,7 @@ export default function Home() {
                 className="text-lg font-semibold"
                 style={{ color: "rgba(255,255,255,0.95)" }}
               >
-                YC Validated Ideas
+                Market Intelligence
               </h2>
               <span
                 style={{
@@ -291,15 +294,14 @@ export default function Home() {
                   border: "1px solid rgba(16,185,129,0.25)",
                 }}
               >
-                FROM YC RFS
+                {ycIdeas.length} IDEAS
               </span>
             </div>
             <p
               className="text-sm mb-6"
               style={{ color: "rgba(255,255,255,0.4)" }}
             >
-              Ideas Y Combinator has publicly stated they want to fund. Click
-              any card to see full analysis and execution brief.
+              Live startup ideas from YC RFS, recent YC batches, HN builders, and GitHub trending. Click any card for full analysis and execution brief.
             </p>
             <div
               style={{
