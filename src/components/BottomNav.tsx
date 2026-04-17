@@ -1,6 +1,6 @@
 "use client";
 
-import { Database, LayoutDashboard, Search, Skull } from "lucide-react";
+import { Database, LayoutDashboard, Search, Skull, Radar } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -14,6 +14,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Home", href: "/", icon: LayoutDashboard },
   { label: "Ideas", href: "/ideas", icon: Database },
   { label: "Failures", href: "/failures", icon: Skull },
+  { label: "Intel", href: "/intelligence", icon: Radar },
   { label: "Search", href: "/search", icon: Search },
 ];
 

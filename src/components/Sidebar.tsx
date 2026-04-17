@@ -1,6 +1,6 @@
 "use client";
 
-import { Database, LayoutDashboard, Skull } from "lucide-react";
+import { Database, LayoutDashboard, Skull, Radar } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -14,6 +14,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
   { label: "Ideas Database", href: "/ideas", icon: Database },
   { label: "Failure Library", href: "/failures", icon: Skull },
+  { label: "Intelligence", href: "/intelligence", icon: Radar },
 ];
 
 export default function Sidebar() {
