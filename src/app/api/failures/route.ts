@@ -30,12 +30,17 @@ export async function GET() {
     return NextResponse.json({ failures: [], error: "No database connection" });
   }
 
+  // Pull curated entries first (manual/quality data), then YC OSS data
+  // Limit total to 200 for performance — curated first, then by year
   const { data, error } = await sb
     .from("startup_failures")
     .select("*")
     .not("failure_mode", "is", null)
     .not("company_name", "is", null)
-    .order("year_failed", { ascending: false, nullsFirst: false });
+    .in("failure_mode", ["PMF", "Timing", "Team", "Market", "Competition", "UnitEconomics", "Regulatory"])
+    .order("source", { ascending: true }) // curated before yc_oss_api
+    .order("year_failed", { ascending: false, nullsFirst: false })
+    .limit(200);
 
   if (error) {
     return NextResponse.json({ failures: [], error: error.message });
